@@ -54,7 +54,7 @@ body[data-role=view] .editonly{display:none!important}
 </style></head><body>
 <div id="gate"><div class="box"><h2>🔐 NHẬP MÃ TRUY CẬP</h2><p>Dùng mã chỉnh sửa để sửa sơ đồ, hoặc mã xem để chỉ xem.</p><input id="gk" placeholder="VD: VIEW-XXXX-XXXX" autocomplete="off"><button id="gb">Vào xem sơ đồ</button><div id="gerr"></div></div></div>
 <!-- Tiêu đề chính của ứng dụng. -->
-<header><h1>SƠ ĐỒ CHỖ NGỒI · GIẢNG ĐƯỜNG 1</h1><div class="sub">LIÊN CHI ĐOÀN KHOA CÔNG NGHỆ VÀ KỸ THUẬT · KHÓA 25 &amp; 26 · <span id="batchTitle">ĐỢT 1</span></div></header>
+<header><h1>SƠ ĐỒ CHỖ NGỒI · GIẢNG ĐƯỜNG 1</h1><div class="sub">LIÊN CHI ĐOÀN KHOA CÔNG NGHỆ VÀ KỸ THUẬT · KHÓA 24, 25 &amp; 26 · <span id="batchTitle">ĐỢT 1</span></div></header>
 <div style="text-align:center;margin-bottom:6px"><span class="chip" id="role"></span> <button class="chip" id="out">Đổi mã</button></div>
 <div class="sub" id="sync" style="text-align:center;margin-top:-6px">Nhập mã để đồng bộ</div>
 <!-- Khu vực hiển thị thống kê K26/K25/K24 và số ghế. -->
@@ -65,7 +65,7 @@ body[data-role=view] .editonly{display:none!important}
 <!-- Bộ chọn giữa hai đợt độc lập. -->
 <div class="classes" id="batches"><button class="chip on" data-b="0">📋 ĐỢT 1</button><button class="chip" data-b="1">📋 ĐỢT 2</button></div><!-- Bộ chọn lớp dạng dropdown, đặt phía trên danh sách tên lớp. -->
 <div class="classpicker"><label for="topClass">Chọn lớp</label><select id="topClass"><option value="-1">— Chọn lớp —</option></select></div><!-- Danh sách lớp dạng chip, dùng để làm nổi bật lớp. -->
-<div class="classes" id="classes"></div>
+<div class="classes" id="classes" style="display:none!important"></div>
 <!-- Khung sơ đồ 234 ghế. -->
 <div class="wrap" id="wrap"><div id="fitbox"><div id="fit"><div class="stage">SÂN KHẤU – BỤC PHÁT BIỂU</div><div class="hall" id="hall"></div></div></div></div>
 <!-- Bảng thông tin và chỉnh sửa ghế đang chọn. -->
@@ -184,7 +184,7 @@ function render(){
   if(side==0){h+='<div class="aisle">'+Array.from({length:13},(_,i)=>`<span>H${i+1}</span>`).join('')+'</div>'}
  }
  $('hall').innerHTML=h;
- $('classes').innerHTML=C.map((c,i)=>`<button class="chip ${hl==i?'on':''}" data-c="${i}">${short(c)} (${S.filter(s=>s.c==i).length})</button>`).join('');
+ $('classes').innerHTML='';
  const tc=$('topClass');
  if(tc){
    const selectedClass=(sel>=0&&S[sel].c>=0)?S[sel].c:hl;
