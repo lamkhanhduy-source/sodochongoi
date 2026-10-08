@@ -31,7 +31,6 @@ button.chip{cursor:pointer;transition:.15s;font-family:inherit}button.chip:hover
 .k25{box-shadow:inset 0 -4px #ffd54f,0 0 12px -3px var(--g)}.k26{box-shadow:inset 0 -4px #26c6da,0 0 12px -3px var(--g)}
 .panel{max-width:820px;margin:16px auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:end;font-size:13px;backdrop-filter:blur(6px)}
 .panel label{display:flex;flex-direction:column;gap:4px;color:var(--mut);font-size:12px}.panel select,.panel input{padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--empty);color:var(--fg);min-width:180px;font-size:13px}
-.classpicker{max-width:820px;margin:12px auto 8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(6px)}.classpicker label{color:var(--mut);font-size:12px;white-space:nowrap}.classpicker select{flex:1;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--empty);color:var(--fg);font-size:13px;min-width:0}
 .note{max-width:820px;margin:8px auto;font-size:12px;color:var(--mut);text-align:center;line-height:1.6}
 @media print{.panel,.classes,.note,.legend:first-of-type{display:none}body{background:#fff;color:#000}}
 #fitbox{margin:0 auto;overflow:hidden}#fit{width:max-content;transform-origin:top left}.stage{min-width:0!important;max-width:none!important;width:100%;box-sizing:border-box}.hall{min-width:0!important}.wrap{overflow:hidden}
@@ -50,7 +49,7 @@ body[data-role=view] .editonly{display:none!important}
 <div class="stats" id="stats"></div>
 <div class="legend"><button class="chip on" id="exp" >📷 Xuất ảnh PNG</button><button class="chip" id="rst">↺ Khôi phục mặc định</button><button class="chip editonly" id="clr">🗑 Xóa tất cả ghế đã xếp</button></div>
 <div class="legend" id="legend"></div>
-<div class="classes" id="batches"><button class="chip on" data-b="0">📋 ĐỢT 1</button><button class="chip" data-b="1">📋 ĐỢT 2</button></div><div class="classpicker"><label for="topClass">Chọn lớp</label><select id="topClass"><option value="-1">— Chọn lớp —</option></select></div><div class="classes" id="classes"></div>
+<div class="classes" id="batches"><button class="chip on" data-b="0">📋 ĐỢT 1</button><button class="chip" data-b="1">📋 ĐỢT 2</button></div><div class="classes" id="classes"></div>
 <div class="wrap" id="wrap"><div id="fitbox"><div id="fit"><div class="stage">SÂN KHẤU – BỤC PHÁT BIỂU</div><div class="hall" id="hall"></div></div></div></div>
 <div class="panel" id="panel"><span>Bấm vào một ghế để chỉnh sửa.</span></div>
 <div class="note">Có 2 đợt độc lập, mỗi đợt giữ nguyên toàn bộ 234 vị trí ghế. Chuyển Đợt 1/Đợt 2 để xếp sơ đồ riêng cho từng đợt. Khóa 26 ngồi các hàng đầu (hàng 1–8), Khóa 25 ngồi phía sau. Mẹo: <b>kéo-thả</b> một ghế sang ghế khác để hoán đổi; kéo ghế đã xếp vào ghế trống để chuyển chỗ. Viền vàng = Khóa 25, viền xanh ngọc = Khóa 26. Bấm tên lớp phía trên để làm nổi bật lớp đó. Dùng Ctrl+P để in/lưu PDF.</div>
@@ -131,11 +130,6 @@ function render(){
  }
  $('hall').innerHTML=h;
  $('classes').innerHTML=C.map((c,i)=>`<button class="chip ${hl==i?'on':''}" data-c="${i}">${short(c)} (${S.filter(s=>s.c==i).length})</button>`).join('');
- const tc=$('topClass');
- if(tc){
-   const selectedClass=(sel>=0&&S[sel].c>=0)?S[sel].c:hl;
-   tc.innerHTML='<option value="-1">— Chọn lớp —</option>'+C.map((c,i)=>`<option value="${i}" ${selectedClass==i?'selected':''}>${short(c)} (${S.filter(s=>s.c==i).length})</option>`).join('');
- }
  stats();panel();
 }
 function panel(){
@@ -143,8 +137,10 @@ function panel(){
  const s=S[sel],side=sel<N?'Trái':'Phải',i=sel%N;
  if(ROLE!=='edit'){const cl=s.c>=0?C[s.c]:null;$('panel').innerHTML=`<b>Ghế: bên ${side}, hàng ${Math.floor(i/9)+1}, cột ${i%9+1}</b><span>${cl?'CHI ĐOÀN '+cl+' – '+R[s.r][1]+(s.n?' – '+s.n:''):'Ghế trống'}</span>`;return}
  $('panel').innerHTML=`<b>Ghế: bên ${side}, hàng ${Math.floor(i/9)+1}, cột ${i%9+1}</b>
+ <label>Lớp<select id="pc"><option value="-1">— Trống —</option>${C.map((c,j)=>`<option value="${j}" ${s.c==j?'selected':''}>CHI ĐOÀN ${c}</option>`).join('')}</select></label>
  <label>Chức vụ<select id="pr">${R.map((r,j)=>`<option value="${j}" ${s.r==j?'selected':''}>${r[1]}</option>`).join('')}</select></label>
  <label>Họ tên (tùy chọn)<input id="pn" value="${s.n.replace(/"/g,'&quot;')}" placeholder="Nhập tên"></label>`;
+ $('pc').onchange=e=>{s.c=+e.target.value;save();render()};
  $('pr').onchange=e=>{s.r=+e.target.value;save();render()};
  $('pn').onchange=e=>{s.n=e.target.value.trim();save();render()};
 }
@@ -156,16 +152,6 @@ $('hall').addEventListener('dragleave',e=>{const d=e.target.closest('.s');if(d)d
 $('hall').addEventListener('dragend',()=>{dragK=-1;document.querySelectorAll('.s.dragging,.s.dragover').forEach(x=>x.classList.remove('dragging','dragover'))});
 $('hall').addEventListener('drop',e=>{if(ROLE!=='edit')return;const d=e.target.closest('.s');if(!d||dragK<0)return;e.preventDefault();const to=+d.dataset.k;if(to!==dragK){[S[dragK],S[to]]=[S[to],S[dragK]];sel=to;save();render()}dragK=-1});
 $('classes').onclick=e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.c;hl=hl==i?-1:i;render()};
-$('topClass').onchange=e=>{
- const i=+e.target.value;
- if(i<0){hl=-1;render();return}
- if(ROLE==='edit' && sel>=0){
-   S[sel].c=i;
-   save();
- }
- hl=i;
- render();
-};
 $('batches').onclick=e=>{
   const b=e.target.closest('button');if(!b)return;
   BATCH=+b.dataset.b;S=BATCHES[BATCH];sel=-1;hl=-1;
