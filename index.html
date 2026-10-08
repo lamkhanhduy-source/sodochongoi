@@ -54,7 +54,7 @@ body[data-role=view] .editonly{display:none!important}
 </style></head><body>
 <div id="gate"><div class="box"><h2>🔐 NHẬP MÃ TRUY CẬP</h2><p>Dùng mã chỉnh sửa để sửa sơ đồ, hoặc mã xem để chỉ xem.</p><input id="gk" placeholder="VD: VIEW-XXXX-XXXX" autocomplete="off"><button id="gb">Vào xem sơ đồ</button><div id="gerr"></div></div></div>
 <!-- Tiêu đề chính của ứng dụng. -->
-<header><h1>SƠ ĐỒ CHỖ NGỒI · GIẢNG ĐƯỜNG 1</h1><div class="sub">LIÊN CHI ĐOÀN KHOA CÔNG NGHỆ VÀ KỸ THUẬT · KHÓA 25 &amp; 26 · <span id="batchTitle">ĐỢT 1</span></div></header>
+<header><h1>SƠ ĐỒ CHỖ NGỒI · GIẢNG ĐƯỜNG 1</h1><div class="sub">LIÊN CHI ĐOÀN KHOA CÔNG NGHỆ VÀ KỸ THUẬT · KHÓA 24, 25 &amp; 26 · <span id="batchTitle">ĐỢT 1</span></div></header>
 <div style="text-align:center;margin-bottom:6px"><span class="chip" id="role"></span> <button class="chip" id="out">Đổi mã</button></div>
 <div class="sub" id="sync" style="text-align:center;margin-top:-6px">Nhập mã để đồng bộ</div>
 <!-- Khu vực hiển thị thống kê K26/K25/K24 và số ghế. -->
@@ -193,6 +193,11 @@ function render(){
  }
  stats();panel();
 }
+// Kiểm tra trùng cùng Lớp + Chức vụ trong đợt hiện tại.
+function isDuplicate(c,r,ignoreIndex){
+  return c>=0 && S.some((x,i)=>i!==ignoreIndex && x.c===c && x.r===r);
+}
+
 // Vẽ bảng thông tin/chỉnh sửa của ghế đang chọn.
 function panel(){
  if(sel<0){$('panel').innerHTML='<span>Bấm vào một ghế để chỉnh sửa.</span>';return}
@@ -201,9 +206,6 @@ function panel(){
  $('panel').innerHTML=`<b>Ghế: bên ${side}, hàng ${Math.floor(i/9)+1}, cột ${i%9+1}</b>
  <label>Chức vụ<select id="pr">${R.map((r,j)=>`<option value="${j}" ${s.r==j?'selected':''}>${r[1]}</option>`).join('')}</select></label>
  <label>Họ tên (tùy chọn)<input id="pn" value="${s.n.replace(/"/g,'&quot;')}" placeholder="Nhập tên"></label>`;
- function isDuplicate(c,r,ignoreIndex){
-  return c>=0 && S.some((x,i)=>i!==ignoreIndex && x.c===c && x.r===r);
-}
 $('pr').onchange=e=>{
   const newRole=+e.target.value;
   if(isDuplicate(s.c,newRole,sel)){
