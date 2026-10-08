@@ -224,6 +224,12 @@ $('hall').addEventListener('contextmenu',e=>{
   if(!d)return;
   const k=+d.dataset.k;
   if(k<0||k>=S.length||S[k].c<0)return;
+  const s=S[k];
+  const cl=s.c>=0?C[s.c]:'';
+  const roleName=s.r>=0&&s.r<R.length?R[s.r][1]:'';
+  const name=s.n?(' – '+s.n):'';
+  const ok=confirm('Bạn có chắc muốn xóa khỏi vị trí này?\n\n'+cl+' – '+roleName+name);
+  if(!ok)return;
   S[k]={c:-1,r:0,n:''};
   sel=-1;
   hl=-1;
