@@ -54,7 +54,7 @@ body[data-role=view] .editonly{display:none!important}
 </style></head><body>
 <div id="gate"><div class="box"><h2>🔐 NHẬP MÃ TRUY CẬP</h2><p>Dùng mã chỉnh sửa để sửa sơ đồ, hoặc mã xem để chỉ xem.</p><input id="gk" placeholder="VD: VIEW-XXXX-XXXX" autocomplete="off"><button id="gb">Vào xem sơ đồ</button><div id="gerr"></div></div></div>
 <!-- Tiêu đề chính của ứng dụng. -->
-<header><h1>SƠ ĐỒ CHỖ NGỒI · GIẢNG ĐƯỜNG 1</h1><div class="sub">LIÊN CHI ĐOÀN KHOA CÔNG NGHỆ VÀ KỸ THUẬT · KHÓA 24, 25 &amp; 26 · <span id="batchTitle">ĐỢT 1</span></div></header>
+<header><h1>SƠ ĐỒ CHỖ NGỒI · GIẢNG ĐƯỜNG 1</h1><div class="sub">LIÊN CHI ĐOÀN KHOA CÔNG NGHỆ VÀ KỸ THUẬT · KHÓA 25 &amp; 26 · <span id="batchTitle">ĐỢT 1</span></div></header>
 <div style="text-align:center;margin-bottom:6px"><span class="chip" id="role"></span> <button class="chip" id="out">Đổi mã</button></div>
 <div class="sub" id="sync" style="text-align:center;margin-top:-6px">Nhập mã để đồng bộ</div>
 <!-- Khu vực hiển thị thống kê K26/K25/K24 và số ghế. -->
@@ -200,11 +200,36 @@ function panel(){
  $('panel').innerHTML=`<b>Ghế: bên ${side}, hàng ${Math.floor(i/9)+1}, cột ${i%9+1}</b>
  <label>Chức vụ<select id="pr">${R.map((r,j)=>`<option value="${j}" ${s.r==j?'selected':''}>${r[1]}</option>`).join('')}</select></label>
  <label>Họ tên (tùy chọn)<input id="pn" value="${s.n.replace(/"/g,'&quot;')}" placeholder="Nhập tên"></label>`;
- $('pr').onchange=e=>{s.r=+e.target.value;save();render()};
+ function isDuplicate(c,r,ignoreIndex){
+  return c>=0 && S.some((x,i)=>i!==ignoreIndex && x.c===c && x.r===r);
+}
+$('pr').onchange=e=>{
+  const newRole=+e.target.value;
+  if(isDuplicate(s.c,newRole,sel)){
+    alert('⚠️ Trùng lặp! Lớp '+C[s.c]+' đã có chức vụ '+R[newRole][1]+' ở vị trí khác.');
+    e.target.value=String(s.r);
+    return;
+  }
+  s.r=newRole;save();render();
+};
  $('pn').onchange=e=>{s.n=e.target.value.trim();save();render()};
 }
 // Chọn ghế khi người dùng bấm vào sơ đồ.
 $('hall').onclick=e=>{const d=e.target.closest('.s');if(!d)return;sel=+d.dataset.k;render()};
+// Bắt sự kiện chuột phải trên một ghế để xóa người/lớp khỏi đúng vị trí đó.
+$('hall').addEventListener('contextmenu',e=>{
+  e.preventDefault();
+  if(ROLE!=='edit')return;
+  const d=e.target.closest('.s');
+  if(!d)return;
+  const k=+d.dataset.k;
+  if(k<0||k>=S.length||S[k].c<0)return;
+  S[k]={c:-1,r:0,n:''};
+  sel=-1;
+  hl=-1;
+  save();
+  render();
+});
 // Lưu vị trí ghế đang được kéo.
 let dragK=-1;
 $('hall').// Cập nhật kích thước sơ đồ khi thay đổi cửa sổ.
@@ -220,6 +245,12 @@ $('topClass').onchange=e=>{
  const i=+e.target.value;
  if(i<0){hl=-1;render();return}
  if(ROLE==='edit' && sel>=0){
+   const currentRole=S[sel].r;
+   if(isDuplicate(i,currentRole,sel)){
+     alert('⚠️ Trùng lặp! Lớp '+C[i]+' đã có chức vụ '+R[currentRole][1]+' ở vị trí khác.');
+     e.target.value=String(S[sel].c);
+     return;
+   }
    S[sel].c=i;
    save();
  }
