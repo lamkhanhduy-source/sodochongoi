@@ -5,21 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sơ đồ chỗ ngồi · Giảng đường 1</title>
 <style>
-/* ===== CSS: GIAO DIỆN CHUNG ===== */
-/* Màu nền, màu chữ và màu giao diện chính */
 :root{--bg:#0b1220;--card:#111a2b;--line:#26344d;--fg:#eef4ff;--mut:#9fb0c8;--acc:#4dd0e1;--acc2:#80cbc4;--empty:#e9edf3}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px "Segoe UI",Arial,sans-serif}
 header{text-align:center;padding:18px 12px 8px}h1{margin:0;font-size:25px}.sub{color:var(--mut);font-size:12px;margin-top:5px}
 button,input,select{font:inherit}.chip{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:9px;padding:8px 11px;cursor:pointer}.chip:hover{border-color:var(--acc)}
 .top{text-align:center;margin:5px auto 10px}.stats{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:8px}.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 13px;min-width:105px;text-align:center}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--mut)}
 .legend,.tools,.classpicker{display:flex;justify-content:center;align-items:end;gap:8px;flex-wrap:wrap;margin:8px auto;max-width:1100px}.classpicker{align-items:end}.classpicker label{display:flex;flex-direction:column;gap:4px;color:var(--mut);font-size:12px;text-align:left}.classpicker input,.classpicker select,.panel select,.panel input{padding:9px;border-radius:8px;border:1px solid var(--line);background:var(--empty);color:#111;min-width:190px}
-/* ===== NÚT CHUYỂN ĐỢT 1 / ĐỢT 2 ===== */
 .batch{display:flex;justify-content:center;gap:8px;margin:10px}.batch .on{background:linear-gradient(90deg,var(--acc),var(--acc2));color:#07131d;font-weight:700}
-.wrap{overflow:hidden;margin:10px auto}.stage{background:#795548;color:#fff;text-align:center;font-weight:700;padding:12px;border-radius:10px;max-width:900px;margin:0 auto 10px}/* ===== KHU VỰC 234 GHẾ ===== */
-.hall{display:grid;grid-template-columns:1fr 70px 1fr;gap:12px;max-width:1120px;margin:auto}.blk{display:grid;grid-template-columns:repeat(9,minmax(45px,1fr));gap:6px}
+.wrap{overflow:hidden;margin:10px auto}.stage{background:#795548;color:#fff;text-align:center;font-weight:700;padding:12px;border-radius:10px;max-width:900px;margin:0 auto 10px}.hall{display:grid;grid-template-columns:1fr 70px 1fr;gap:12px;max-width:1120px;margin:auto}.blk{display:grid;grid-template-columns:repeat(9,minmax(45px,1fr));gap:6px}
 .s{min-height:55px;border-radius:8px;padding:5px 3px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;border:2px solid transparent;user-select:none;cursor:pointer;position:relative}.s.k25{border-bottom-color:#ffd54f}.s.k26{border-bottom-color:#26c6da}.s.e{background:var(--empty);color:#777;border:1px dashed #aeb7c4}.s.sel{outline:3px solid #fff;outline-offset:1px}.s.dragging{opacity:.45}.s.dragover{outline:3px dashed #fff;outline-offset:1px}.s span{font-size:11px;line-height:1.1}.s b{font-size:13px;margin-top:3px}.aisle{display:grid;grid-template-rows:repeat(13,1fr);gap:6px;align-items:center;text-align:center;color:#66758c}.dim{opacity:.25}
 .panel{max-width:900px;margin:12px auto;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}.panel label{display:flex;flex-direction:column;gap:4px;color:var(--mut);font-size:12px}.note{text-align:center;color:var(--mut);font-size:12px;max-width:900px;margin:10px auto 25px;line-height:1.6}
-/* ===== MÀN HÌNH NHẬP MÃ TRUY CẬP ===== */
 #gate{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:25px;max-width:380px;width:100%;text-align:center}.box input{width:100%;padding:12px;margin:12px 0;border-radius:9px;border:1px solid var(--line);text-align:center}.box button{width:100%}#gerr{color:#ff8080;min-height:18px;margin-top:8px}
 body[data-role=view] .editonly{display:none!important}
 @media(max-width:850px){.hall{grid-template-columns:1fr}.aisle{display:none}.blk{grid-template-columns:repeat(9,minmax(35px,1fr))}.s{min-height:48px}.s span{font-size:9px}.s b{font-size:11px}}
@@ -44,69 +39,48 @@ body[data-role=view] .editonly{display:none!important}
 <div class="note">Mẹo: bấm một ghế (kể cả <b>ghế trống</b>) rồi chọn lớp ở phía trên để gán lớp. Kéo-thả ghế đã xếp sang ghế khác để hoán đổi; kéo ghế đã xếp vào ghế trống để chuyển chỗ. Cùng một lớp không được trùng cùng chức vụ trong cùng một đợt.</div>
 
 <script>
-/* =========================================================
-   JAVASCRIPT CHÍNH – SƠ ĐỒ CHỖ NGỒI GIẢNG ĐƯỜNG 1
-   ========================================================= */
-/* ===== DANH SÁCH CHỨC VỤ ===== */
 const R=[
  ['BT','Bí thư','#e53935','#fff'],['PBT','Phó Bí thư','#fb8c00','#000'],
  ['LT','Lớp trưởng','#1e88e5','#fff'],['LP','Lớp phó','#90caf9','#000'],
  ['CHT','Chi Hội trưởng','#43a047','#fff'],['CHP','Chi Hội phó','#a5d6a7','#000'],
  ['BCS','Ban Cán sự khác','#ab47bc','#fff']
 ];
-/* ===== DANH SÁCH 42 LỚP K24/K25/K26 ===== */
 const C=[
 'ĐHCNSH25A','ĐHCNSH25B','ĐHCNTP25A','ĐHKTXD25A','ĐHKTXD25B','ĐHKTOTO25A','ĐHCNTT25B-IT','ĐHCNTT25C-IT','ĐHCNTT25A-CS','ĐHCNTT25B-CS','ĐHCNTT25A-IT',
 'ĐHANM26A','ĐHANM26B','ĐHANM26C','ĐHCNNN26A','ĐHCNSH26A','ĐHCNSH26B','ĐHCNTP26A','ĐHCNTT26A-CS','ĐHCNTT26B-CS','ĐHCNTT26C-CS','ĐHCNTT26A-IT','ĐHCNTT26B-IT','ĐHCNTT26C-IT','ĐHCNTT26D-IT','ĐHKTĐĐT26A','ĐHKTOTO26A','ĐHKTXD26A','ĐHKTXD26B','ĐHKTXDGT26A',
 'ĐHCNTT24A-IT','ĐHCNTT24B-IT','ĐHCNTT24C-IT','ĐHCNTT24D-IT','ĐHCNTT24E-IT','ĐHCNTT24A-CS','ĐHCNTT24B-CS','ĐHCNTT24C-CS','ĐHCNSH24A','ĐHCNSH24B','ĐHCNTP24A','ĐHKTXD24A'
 ];
-/* Hiển thị tên lớp ngắn hơn bằng cách bỏ tiền tố ĐH */
 const short=c=>c.replace(/^ĐH/,'');
-/* Xác định khóa của lớp dựa vào mã lớp */
 const khoa=c=>/25/.test(c)?25:/24/.test(c)?24:26;
-/* Mỗi bên có 117 ghế -> tổng cộng 234 ghế */
 const N=117, EMPTY=()=>({c:-1,r:0,n:''});
-/* ===== TẠO SƠ ĐỒ MẶC ĐỊNH =====
-   Mỗi lớp chiếm 7 ghế theo thứ tự chức vụ trong R. */
 const makeDefault=()=>{const s=Array.from({length:2*N},EMPTY);
  const L=[11,12,13,14,15,16,17,18,19,20,0,1,2,3,4,5],Rt=[21,22,23,24,25,26,27,28,29,6,7,8,9,10];
  L.forEach((c,j)=>{for(let q=0;q<7;q++)s[j*7+q]={c,r:q,n:''}});
  Rt.forEach((c,j)=>{for(let q=0;q<7;q++)s[N+j*7+q]={c,r:q,n:''}});
  return s};
-/* Tạo bản sao dữ liệu ghế để tránh dùng chung object */
 const clone=q=>q.map(s=>({c:Number.isInteger(s.c)?s.c:-1,r:Number.isInteger(s.r)?s.r:0,n:typeof s.n==='string'?s.n:''}));
-/* BATCHES[0] = Đợt 1, BATCHES[1] = Đợt 2.
-   S luôn trỏ tới đợt đang được mở. */
 let BATCHES=[makeDefault(),makeDefault()],BATCH=0,S=BATCHES[0],sel=-1,hl=-1;
 const $=id=>document.getElementById(id);
 let ROLE=null,KEY='',dirty=false,LASTAT=0,poll=null,tm,dragK=-1;
 
-/* Kiểm tra dữ liệu có đúng 234 ghế hay không */
 function isValidSeats(q){return Array.isArray(q)&&q.length===234&&q.every(s=>s&&Number.isInteger(s.c)&&s.c>=-1&&s.c<C.length&&Number.isInteger(s.r)&&s.r>=0&&s.r<R.length&&typeof s.n==='string'&&s.n.length<80)}
-/* Kiểm tra trùng cùng LỚP + cùng CHỨC VỤ trong một đợt */
 function isDuplicate(c,r,ignoreIndex){return c>=0&&S.some((x,i)=>i!==ignoreIndex&&x.c===c&&x.r===r)}
-/* ===== CHUYỂN GIỮA ĐỢT 1 VÀ ĐỢT 2 ===== */
 function setBatch(n){BATCH=n;S=BATCHES[BATCH];sel=-1;hl=-1;render();$('b1').classList.toggle('on',n===0);$('b2').classList.toggle('on',n===1)}
 function stat(k){const m={ok:'☁ Đã đồng bộ chung – tự cập nhật mỗi 5 giây',sync:'⏳ Đang lưu lên máy chủ...',ro:'⚠ Lưu máy chủ thất bại, sẽ thử lại ở lần sửa kế tiếp'};$('sync').textContent=m[k]||''}
-/* Cập nhật thống kê số lớp và số ghế */
 function stats(){const e=S.filter(s=>s.c<0).length,assigned=234-e;
  const count=k=>new Set(S.filter(s=>s.c>=0&&khoa(C[s.c])===k).map(s=>s.c)).size;
  $('stats').innerHTML=[[count(26),'Lớp K26'],[count(25),'Lớp K25'],[count(24),'Lớp K24'],[assigned,'Ghế đã xếp'],[e,'Ghế trống']].map(x=>`<div class="stat"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')
 }
-/* ===== LƯU DỮ LIỆU =====
-   Lưu localStorage trước, sau đó POST cả 2 đợt lên API. */
 function save(){
  BATCHES[BATCH]=S;
  try{localStorage.setItem('gd1v3',JSON.stringify({batches:BATCHES}))}catch(e){}
  if(ROLE!=='edit')return;
  dirty=true;stat('sync');clearTimeout(tm);
  tm=setTimeout(async()=>{try{
-  /* Gửi cả hai đợt lên /api/seats */
   const r=await fetch('/api/seats',{method:'POST',headers:{'content-type':'application/json','x-access-key':KEY},body:JSON.stringify({batches:BATCHES})});
   if(!r.ok)throw 0;const j=await r.json();LASTAT=j.at||Date.now();dirty=false;stat('ok')
  }catch(e){stat('ro')}},350)
 }
-/* ===== LẤY DỮ LIỆU MỚI TỪ SERVER ===== */
 async function pull(){
  if(!ROLE||dirty)return;
  try{const r=await fetch('/api/seats',{headers:{'x-access-key':KEY},cache:'no-store'});if(!r.ok)return;
@@ -117,17 +91,13 @@ async function pull(){
   }stat('ok')
  }catch(e){}
 }
-/* Tự động kiểm tra server mỗi 5 giây */
 function startPoll(){clearInterval(poll);poll=setInterval(pull,5000)}
 
-/* ===== VẼ LẠI TOÀN BỘ 234 GHẾ ===== */
 function render(){
  let h='';
  for(const side of [0,1]){
   h+='<div class="blk">';
   for(let i=0;i<N;i++){const k=side*N+i,s=S[k];
-   /* Ghế trống vẫn là một phần tử .s nên vẫn có thể CLICK để chọn,
-      nhưng không thể tự bắt đầu kéo. */
    if(s.c<0){h+=`<div class="s e ${k===sel?'sel':''}" data-k="${k}" draggable="false">Trống</div>`;continue}
    const r=R[s.r],cl=C[s.c];
    h+=`<div class="s k${khoa(cl)} ${k===sel?'sel':''} ${hl>=0&&hl!==s.c?'dim':''}" data-k="${k}" draggable="${ROLE==='edit'}" style="background:${r[2]};color:${r[3]}" title="${cl} – ${r[1]}${s.n?' – '+s.n:''}"><span>${short(cl)}</span><b>${s.n||r[0]}</b></div>`
@@ -142,7 +112,6 @@ function render(){
   .map(x=>`<option value="${x.i}" ${selected===x.i?'selected':''}>${short(x.c)} (${S.filter(s=>s.c===x.i).length})</option>`).join('');
  stats();panel();
 }
-/* ===== BẢNG CHỈNH SỬA GHẾ ĐANG CHỌN ===== */
 function panel(){
  if(sel<0){$('panel').innerHTML='<span>Bấm vào một ghế để chỉnh sửa.</span>';return}
  const s=S[sel],side=sel<N?'Trái':'Phải',i=sel%N;
@@ -163,22 +132,14 @@ function panel(){
  };
  $('pn').onchange=e=>{s.n=e.target.value.trim();save();render()}
 }
-/* Bấm vào ghế, kể cả ghế trống, để chọn ghế */
 $('hall').addEventListener('click',e=>{const d=e.target.closest('.s');if(!d)return;sel=+d.dataset.k;render()});
-/* ===== KÉO GHẾ =====
-   Chỉ ghế đã xếp mới được kéo. */
 $('hall').addEventListener('dragstart',e=>{
  if(ROLE!=='edit')return;const d=e.target.closest('.s');if(!d)return;const k=+d.dataset.k;
  if(k<0||S[k].c<0)return;dragK=k;d.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(k))
 });
-/* Cho phép thả lên ghế đích, kể cả ghế trống */
 $('hall').addEventListener('dragover',e=>{if(ROLE!=='edit'||dragK<0)return;const d=e.target.closest('.s');if(!d)return;if(+d.dataset.k===dragK)return;e.preventDefault();e.dataTransfer.dropEffect='move';d.classList.add('dragover')});
-/* Bỏ hiệu ứng khi rê chuột ra khỏi ghế đích */
 $('hall').addEventListener('dragleave',e=>{const d=e.target.closest('.s');if(d)d.classList.remove('dragover')});
-/* Kết thúc kéo: xóa trạng thái kéo */
 $('hall').addEventListener('dragend',()=>{dragK=-1;document.querySelectorAll('.dragging,.dragover').forEach(x=>x.classList.remove('dragging','dragover'))});
-/* Khi thả: hoán đổi toàn bộ object ghế.
-   Nếu ghế đích trống thì ghế trống nhận vị trí cũ. */
 $('hall').addEventListener('drop',e=>{
  if(ROLE!=='edit'||dragK<0)return;const d=e.target.closest('.s');if(!d)return;e.preventDefault();
  const to=+d.dataset.k;if(to!==dragK){
@@ -188,13 +149,8 @@ $('hall').addEventListener('drop',e=>{
  }
  dragK=-1
 });
-/* ===== GÁN LỚP VÀO GHẾ =====
-   Cho phép gán lớp mới vào ghế trống.
-   Chỉ chặn khi trùng cùng lớp + cùng chức vụ. */
 $('topClass').onchange=e=>{
  const c=+e.target.value;if(c<0){hl=-1;render();return}
- /* Có sel nghĩa là người dùng đã bấm chọn một ghế.
-     Nếu ghế đang trống thì s.c = -1 và vẫn được phép gán lớp. */
  if(sel>=0&&ROLE==='edit'){
   const r=S[sel].r;
   if(isDuplicate(c,r,sel)){alert('⚠️ Trùng lặp! Lớp '+C[c]+' đã có chức vụ '+R[r][1]+' ở vị trí khác.');render();return}
@@ -202,25 +158,20 @@ $('topClass').onchange=e=>{
  }
  hl=c;render()
 };
-/* Tìm lớp trên dropdown */
 $('classSearch').oninput=()=>render();
-/* Chuyển đợt */
 $('b1').onclick=()=>setBatch(0);$('b2').onclick=()=>setBatch(1);
 
-/* Xóa toàn bộ ghế của đợt hiện tại */
 $('clr').onclick=()=>{
  if(ROLE!=='edit')return;const b=$('clr');
  if(b.dataset.a){BATCHES[BATCH]=Array.from({length:234},EMPTY);S=BATCHES[BATCH];sel=hl=-1;save();render();b.textContent='🗑 Xóa tất cả ghế đã xếp';delete b.dataset.a}
  else{b.dataset.a=1;b.textContent='⚠ Bấm lại để xác nhận xóa hết';setTimeout(()=>{if(b.dataset.a){delete b.dataset.a;b.textContent='🗑 Xóa tất cả ghế đã xếp'}},3000)}
 };
-/* Khôi phục sơ đồ mặc định của đợt hiện tại */
 $('rst').onclick=()=>{
  if(ROLE!=='edit')return;const b=$('rst');
  if(b.dataset.a){BATCHES[BATCH]=makeDefault();S=BATCHES[BATCH];sel=hl=-1;save();render();b.textContent='↺ Khôi phục mặc định';delete b.dataset.a}
  else{b.dataset.a=1;b.textContent='Bấm lại để xác nhận';setTimeout(()=>{if(b.dataset.a){delete b.dataset.a;b.textContent='↺ Khôi phục mặc định'}},3000)}
 };
 
-/* ===== ĐĂNG NHẬP / PHÂN QUYỀN ===== */
 async function login(k){
  k=k.trim().toUpperCase();if(!k)return false;
  try{const r=await fetch('/api/seats',{headers:{'x-access-key':k},cache:'no-store'});if(r.status===401)return false;if(!r.ok)return 'err';
@@ -230,13 +181,10 @@ async function login(k){
   try{localStorage.setItem('gd1key',k)}catch(e){}document.body.dataset.role=ROLE;$('gate').style.display='none';$('role').textContent=ROLE==='edit'?'✏️ Quyền: CHỈNH SỬA':'👁 Quyền: CHỈ XEM';render();stat('ok');startPoll();return true
  }catch(e){return 'err'}
 }
-/* Nút đăng nhập */
 $('gb').onclick=async()=>{$('gerr').textContent='Đang kiểm tra...';const r=await login($('gk').value);$('gerr').textContent=r===true?'':r==='err'?'Không kết nối được máy chủ.':'Mã không đúng, vui lòng thử lại.'};
 $('gk').onkeydown=e=>{if(e.key==='Enter')$('gb').click()};
-/* Đăng xuất / đổi mã */
 $('out').onclick=()=>{try{localStorage.removeItem('gd1key')}catch(e){}clearInterval(poll);ROLE=null;KEY='';sel=-1;$('gate').style.display='flex';$('gk').value='';render()};
 
-/* ===== XUẤT SƠ ĐỒ THÀNH ẢNH PNG ===== */
 function makeCanvas(){
  const cv=document.createElement('canvas'),x=cv.getContext('2d'),cw=124,ch=70,g=6,aisle=70,mx=50,bw=9*cw+8*g,W=mx*2+bw*2+aisle,H=260+13*(ch+g)+70;
  cv.width=W;cv.height=H;x.fillStyle='#fff';x.fillRect(0,0,W,H);
@@ -247,11 +195,8 @@ function makeCanvas(){
   x.fillStyle=s.c<0?'#eceef2':R[s.r][2];x.fillRect(a,b,cw,ch);x.strokeStyle='#999';x.strokeRect(a,b,cw,ch);x.fillStyle=s.c<0?'#777':R[s.r][3];x.font='12px Arial';x.fillText(s.c<0?'Trống':short(C[s.c]),a+cw/2,b+22);x.font='bold 17px Arial';x.fillText(s.c<0?'':(s.n||R[s.r][0]),a+cw/2,b+47)}
  return cv
 }
-/* Tạo và tải ảnh PNG */
 $('exp').onclick=async()=>{const cv=makeCanvas(),blob=await new Promise(r=>cv.toBlob(r,'image/png'));const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`so-do-giang-duong-1-${BATCH+1}.png`;a.click()};
 
-/* ===== KHỞI ĐỘNG ỨNG DỤNG =====
-   Đọc dữ liệu localStorage rồi thử đăng nhập bằng mã đã lưu. */
 function boot(){
  try{
   const t=localStorage.getItem('gd1v3');if(t){const o=JSON.parse(t);if(o&&Array.isArray(o.batches)&&o.batches.length===2&&o.batches.every(isValidSeats)){BATCHES=o.batches.map(clone);S=BATCHES[BATCH]}}
