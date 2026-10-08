@@ -49,10 +49,10 @@ body[data-role=view] .editonly{display:none!important}
 <div class="stats" id="stats"></div>
 <div class="legend"><button class="chip on" id="exp" >📷 Xuất ảnh PNG</button><button class="chip" id="rst">↺ Khôi phục mặc định</button><button class="chip editonly" id="clr">🗑 Xóa tất cả ghế đã xếp</button></div>
 <div class="legend" id="legend"></div>
-<div class="classes" id="classes"></div>
+<div class="classes" id="classes"></div><div class="classes" id="batches"><button class="chip on" data-d="0">Tất cả đợt</button><button class="chip" data-d="1">Đợt 1</button><button class="chip" data-d="2">Đợt 2</button></div>
 <div class="wrap" id="wrap"><div id="fitbox"><div id="fit"><div class="stage">SÂN KHẤU – BỤC PHÁT BIỂU</div><div class="hall" id="hall"></div></div></div></div>
 <div class="panel" id="panel"><span>Bấm vào một ghế để chỉnh sửa.</span></div>
-<div class="note">Khóa 26 ngồi các hàng đầu (hàng 1–8), Khóa 25 ngồi phía sau. Mẹo: <b>kéo-thả</b> một ghế sang ghế khác để hoán đổi; kéo ghế đã xếp vào ghế trống để chuyển chỗ. Viền vàng = Khóa 25, viền xanh ngọc = Khóa 26. Bấm tên lớp phía trên để làm nổi bật lớp đó. Dùng Ctrl+P để in/lưu PDF.</div>
+<div class="note">Sử dụng 2 đợt: mỗi ghế giữ nguyên vị trí và có thể chọn Đợt 1 hoặc Đợt 2. Khóa 26 ngồi các hàng đầu (hàng 1–8), Khóa 25 ngồi phía sau. Mẹo: <b>kéo-thả</b> một ghế sang ghế khác để hoán đổi; kéo ghế đã xếp vào ghế trống để chuyển chỗ. Viền vàng = Khóa 25, viền xanh ngọc = Khóa 26. Bấm tên lớp phía trên để làm nổi bật lớp đó. Dùng Ctrl+P để in/lưu PDF.</div>
 <script>
 const R=[['BT','Bí thư','#e53935','#fff'],['PBT','Phó Bí thư','#fb8c00','#000'],['LT','Lớp trưởng','#1e88e5','#fff'],['LP','Lớp phó','#90caf9','#000'],['CHT','Chi Hội trưởng','#43a047','#fff'],['CHP','Chi Hội phó','#a5d6a7','#000'],['BCS','Ban Cán sự khác','#ab47bc','#fff']];
 const C=['ĐHCNSH25A','ĐHCNSH25B','ĐHCNTP25A','ĐHKTXD25A','ĐHKTXD25B','ĐHKTOTO25A','ĐHCNTT25B-IT','ĐHCNTT25C-IT','ĐHCNTT25A-CS','ĐHCNTT25B-CS','ĐHCNTT25A-IT',
@@ -61,15 +61,15 @@ const C=['ĐHCNSH25A','ĐHCNSH25B','ĐHCNTP25A','ĐHKTXD25A','ĐHKTXD25B','ĐHKT
 const short=c=>c.replace('ĐH','').replace('KTĐĐT','KTĐĐT');
 const khoa=c=>/25/.test(c)?25:26;
 const N=117;let S=[];
-for(let i=0;i<2*N;i++)S.push({c:-1,r:0,n:''});
+for(let i=0;i<2*N;i++)S.push({c:-1,r:0,n:'',d:1});
 const L=[11,12,13,14,15,16,17,18,19,20,0,1,2,3,4,5],Rt=[21,22,23,24,25,26,27,28,29,6,7,8,9,10];
-L.forEach((c,j)=>{for(let q=0;q<7;q++)S[j*7+q]={c:c,r:q,n:''}});
-Rt.forEach((c,j)=>{for(let q=0;q<7;q++)S[N+j*7+q]={c:c,r:q,n:''}});
+L.forEach((c,j)=>{for(let q=0;q<7;q++)S[j*7+q]={c:c,r:q,n:'',d:1}});
+Rt.forEach((c,j)=>{for(let q=0;q<7;q++)S[N+j*7+q]={c:c,r:q,n:'',d:1}});
 const DEF=JSON.stringify(S);
-try{const t=localStorage.getItem('gd1v2');if(t){const p=JSON.parse(t);if(p.length==2*N)S=p}}catch(e){}
-let sel=-1,hl=-1;
+try{const t=localStorage.getItem('gd1v2');if(t){const p=JSON.parse(t);if(p.length==2*N)S=p.map(s=>({...s,d:s.d===2?2:1}))}}catch(e){}
+let sel=-1,hl=-1,hd=0;
 const $=id=>document.getElementById(id);
-function stats(){const f=k=>S.filter(s=>s.c>=0&&khoa(C[s.c])==k).length/7,e=S.filter(s=>s.c<0).length;$('stats').innerHTML=[[f(26),'Lớp K26'],[f(25),'Lớp K25'],[2*N-e,'Ghế đã xếp'],[e,'Ghế trống']].map(x=>`<div class="stat"><b>${Math.round(x[0]*10)/10}</b><span>${x[1]}</span></div>`).join('')}
+function stats(){const f=k=>S.filter(s=>s.c>=0&&khoa(C[s.c])==k).length/7,e=S.filter(s=>s.c<0).length;$('stats').innerHTML=[[f(26),'Lớp K26'],[f(25),'Lớp K25'],[S.filter(s=>s.c>=0&&s.d!==2).length,'Đợt 1'],[S.filter(s=>s.c>=0&&s.d===2).length,'Đợt 2'],[2*N-e,'Ghế đã xếp'],[e,'Ghế trống']].map(x=>`<div class="stat"><b>${Math.round(x[0]*10)/10}</b><span>${x[1]}</span></div>`).join('')}
 $('legend').innerHTML=R.map(r=>`<span class="chip" style="background-color:${r[2]};color:${r[3]};--g:${r[2]}">${r[0]} = ${r[1]}</span>`).join('')+'<span class="chip" style="background:var(--empty)">Ghế trống</span>';
 let tm,ROLE=null,KEY='',dirty=false,LASTAT=0,poll=null;
 function stat(k){const m={ok:'☁ Đã đồng bộ chung – tự cập nhật mỗi 5 giây',ro:'⚠ Lưu lên máy chủ thất bại, sẽ thử lại ở lần sửa kế tiếp',sync:'⏳ Đang lưu lên máy chủ...'};const e=$('sync');if(e)e.textContent=m[k]}
@@ -86,7 +86,7 @@ function render(){
   for(let i=0;i<N;i++){const k=side*N+i,s=S[k];
    if(s.c<0){h+=`<div class="s e ${k==sel?'sel':''}" data-k="${k}" draggable="false">Trống</div>`;continue}
    const r=R[s.r],cl=C[s.c];
-   h+=`<div class="s k${khoa(cl)} ${k==sel?'sel':''} ${hl>=0&&hl!=s.c?'dim':''}" data-k="${k}" draggable="${ROLE==='edit'}" style="background-color:${r[2]};color:${r[3]};--g:${r[2]}" title="${cl} – ${r[1]}${s.n?': '+s.n:''}"><span>${short(cl)}</span><b>${s.n||r[0]}</b></div>`}
+   h+=`<div class="s k${khoa(cl)} ${k==sel?'sel':''} ${hl>=0&&hl!=s.c?'dim':(hd&&s.d!==hd?'dim':'')}" data-k="${k}" draggable="${ROLE==='edit'}" style="background-color:${r[2]};color:${r[3]};--g:${r[2]}" title="${cl} – ${r[1]}${s.n?': '+s.n:''} – Đợt ${s.d===2?2:1}"><span>${short(cl)}</span><b>${s.n||r[0]}</b><span style="font-size:9px;opacity:.8">Đ${s.d===2?2:1}</span></div>`}
   h+='</div>';
   if(side==0){h+='<div class="aisle">'+Array.from({length:13},(_,i)=>`<span>H${i+1}</span>`).join('')+'</div>'}
  }
@@ -97,7 +97,7 @@ function render(){
 function panel(){
  if(sel<0){$('panel').innerHTML='<span>Bấm vào một ghế để chỉnh sửa.</span>';return}
  const s=S[sel],side=sel<N?'Trái':'Phải',i=sel%N;
- if(ROLE!=='edit'){const cl=s.c>=0?C[s.c]:null;$('panel').innerHTML=`<b>Ghế: bên ${side}, hàng ${Math.floor(i/9)+1}, cột ${i%9+1}</b><span>${cl?'CHI ĐOÀN '+cl+' – '+R[s.r][1]+(s.n?' – '+s.n:''):'Ghế trống'}</span>`;return}
+ if(ROLE!=='edit'){const cl=s.c>=0?C[s.c]:null;$('panel').innerHTML=`<b>Ghế: bên ${side}, hàng ${Math.floor(i/9)+1}, cột ${i%9+1}</b><span>${cl?'CHI ĐOÀN '+cl+' – '+R[s.r][1]+(s.n?' – '+s.n:'')+' – Đợt '+(s.d===2?2:1):'Ghế trống'}</span>`;return}
  $('panel').innerHTML=`<b>Ghế: bên ${side}, hàng ${Math.floor(i/9)+1}, cột ${i%9+1}</b>
  <label>Lớp<select id="pc"><option value="-1">— Trống —</option>${C.map((c,j)=>`<option value="${j}" ${s.c==j?'selected':''}>CHI ĐOÀN ${c}</option>`).join('')}</select></label>
  <label>Chức vụ<select id="pr">${R.map((r,j)=>`<option value="${j}" ${s.r==j?'selected':''}>${r[1]}</option>`).join('')}</select></label>
@@ -114,6 +114,7 @@ $('hall').addEventListener('dragleave',e=>{const d=e.target.closest('.s');if(d)d
 $('hall').addEventListener('dragend',()=>{dragK=-1;document.querySelectorAll('.s.dragging,.s.dragover').forEach(x=>x.classList.remove('dragging','dragover'))});
 $('hall').addEventListener('drop',e=>{if(ROLE!=='edit')return;const d=e.target.closest('.s');if(!d||dragK<0)return;e.preventDefault();const to=+d.dataset.k;if(to!==dragK){[S[dragK],S[to]]=[S[to],S[dragK]];sel=to;save();render()}dragK=-1});
 $('classes').onclick=e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.c;hl=hl==i?-1:i;render()};
+$('batches').onclick=e=>{const b=e.target.closest('button');if(!b)return;hd=+b.dataset.d;document.querySelectorAll('#batches .chip').forEach(x=>x.classList.toggle('on',+x.dataset.d===hd));render()};
 
 const FONT='"Segoe UI",Roboto,Arial,sans-serif';
 function makeCanvas(){
@@ -143,8 +144,8 @@ $('exp').onclick=async()=>{
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='so-do-giang-duong-1.png';a.click()};
 function fit(){const w=$('wrap'),f=$('fit'),b=$('fitbox');f.style.transform='none';const nw=f.scrollWidth,nh=f.scrollHeight,k=Math.min(1,(w.clientWidth-32)/nw);f.style.transform='scale('+k+')';b.style.width=nw*k+'px';b.style.height=nh*k+'px'}
 const _r=render;render=function(){_r();fit()};
-$('clr').onclick=()=>{if(ROLE!=='edit')return;const b=$('clr');if(b.dataset.a){S=S.map(s=>({c:-1,r:0,n:''}));sel=-1;hl=-1;save();render();b.textContent='🗑 Xóa tất cả ghế đã xếp';delete b.dataset.a}else{b.dataset.a=1;b.textContent='⚠ Bấm lại để xác nhận xóa hết';setTimeout(()=>{if(b.dataset.a){b.textContent='🗑 Xóa tất cả ghế đã xếp';delete b.dataset.a}},3000)}};
-$('rst').onclick=e=>{const b=e.target;if(b.dataset.a){S=JSON.parse(DEF);sel=-1;hl=-1;save();render();b.textContent='↺ Khôi phục mặc định';delete b.dataset.a}else{b.dataset.a=1;b.textContent='Bấm lại để xác nhận';setTimeout(()=>{b.textContent='↺ Khôi phục mặc định';delete b.dataset.a},3000)}};
+$('clr').onclick=()=>{if(ROLE!=='edit')return;const b=$('clr');if(b.dataset.a){S=S.map(s=>({c:-1,r:0,n:'',d:1}));sel=-1;hl=-1;save();render();b.textContent='🗑 Xóa tất cả ghế đã xếp';delete b.dataset.a}else{b.dataset.a=1;b.textContent='⚠ Bấm lại để xác nhận xóa hết';setTimeout(()=>{if(b.dataset.a){b.textContent='🗑 Xóa tất cả ghế đã xếp';delete b.dataset.a}},3000)}};
+$('rst').onclick=e=>{const b=e.target;if(b.dataset.a){S=JSON.parse(DEF).map(s=>({...s,d:s.d===2?2:1}));sel=-1;hl=-1;save();render();b.textContent='↺ Khôi phục mặc định';delete b.dataset.a}else{b.dataset.a=1;b.textContent='Bấm lại để xác nhận';setTimeout(()=>{b.textContent='↺ Khôi phục mặc định';delete b.dataset.a},3000)}};
 
 async function login(k){k=k.trim().toUpperCase();try{const r=await fetch('/api/seats',{headers:{'x-access-key':k},cache:'no-store'});if(r.status==401)return false;if(!r.ok)return 'err';const j=await r.json();ROLE=j.role;KEY=k;try{localStorage.setItem('gd1key',k)}catch(e){}LASTAT=j.at||0;if(j.seats)applySeats(j.seats);applyRole();stat('ok');startPoll();return true}catch(e){return 'err'}}
 function applyRole(){document.body.dataset.role=ROLE;$('gate').style.display='none';$('role').textContent=ROLE==='edit'?'✏️ Quyền: CHỈNH SỬA':'👁 Quyền: CHỈ XEM';panel()}
@@ -162,6 +163,6 @@ IP.innerHTML='<label style="flex:1;min-width:260px">Dán nội dung file .json v
 IB.onclick=()=>{IP.style.display=IP.style.display=='none'?'':'none'};
 $('rst').after(XB,IB);$('panel').before(IP);[$('rst'),IB,IP].forEach(x=>x.classList.add('editonly'));
 $('jf').onchange=e=>{const f=e.target.files[0];if(f)f.text().then(t=>{$('jt').value=t})};
-$('ja').onclick=()=>{try{const o=JSON.parse($('jt').value);const q=o.seats||o;if(!Array.isArray(q)||q.length!=2*N)throw 0;S=q;sel=-1;save();render();$('jm').textContent='✔ Đã nhập';IP.style.display='none'}catch(e){$('jm').textContent='✖ Dữ liệu không hợp lệ'}};
+$('ja').onclick=()=>{try{const o=JSON.parse($('jt').value);const q=o.seats||o;if(!Array.isArray(q)||q.length!=2*N)throw 0;S=q.map(s=>({...s,d:s.d===2?2:1}));sel=-1;save();render();$('jm').textContent='✔ Đã nhập';IP.style.display='none'}catch(e){$('jm').textContent='✖ Dữ liệu không hợp lệ'}};
 boot();
 </script></body></html>
