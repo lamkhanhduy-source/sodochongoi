@@ -54,7 +54,7 @@ body[data-role=view] .editonly{display:none!important}
 </style></head><body>
 <div id="gate"><div class="box"><h2>🔐 NHẬP MÃ TRUY CẬP</h2><p>Dùng mã chỉnh sửa để sửa sơ đồ, hoặc mã xem để chỉ xem.</p><input id="gk" placeholder="VD: VIEW-XXXX-XXXX" autocomplete="off"><button id="gb">Vào xem sơ đồ</button><div id="gerr"></div></div></div>
 <!-- Tiêu đề chính của ứng dụng. -->
-<header><h1>SƠ ĐỒ CHỖ NGỒI · GIẢNG ĐƯỜNG 1</h1><div class="sub">LIÊN CHI ĐOÀN KHOA CÔNG NGHỆ VÀ KỸ THUẬT · KHÓA 24, 25 &amp; 26 · <span id="batchTitle">ĐỢT 1</span></div></header>
+<header><h1>SƠ ĐỒ CHỖ NGỒI · GIẢNG ĐƯỜNG 1</h1><div class="sub">LIÊN CHI ĐOÀN KHOA CÔNG NGHỆ VÀ KỸ THUẬT · KHÓA 25 &amp; 26 · <span id="batchTitle">ĐỢT 1</span></div></header>
 <div style="text-align:center;margin-bottom:6px"><span class="chip" id="role"></span> <button class="chip" id="out">Đổi mã</button></div>
 <div class="sub" id="sync" style="text-align:center;margin-top:-6px">Nhập mã để đồng bộ</div>
 <!-- Khu vực hiển thị thống kê K26/K25/K24 và số ghế. -->
@@ -260,6 +260,8 @@ $('topClass').onchange=e=>{
  const i=+e.target.value;
  if(i<0){hl=-1;render();return}
  if(ROLE==='edit' && sel>=0){
+   // Ghế trống được phép chèn lớp mới. Chỉ cảnh báo khi
+   // lớp + chức vụ đã tồn tại ở một vị trí khác.
    const currentRole=S[sel].r;
    if(isDuplicate(i,currentRole,sel)){
      alert('⚠️ Trùng lặp! Lớp '+C[i]+' đã có chức vụ '+R[currentRole][1]+' ở vị trí khác.');
