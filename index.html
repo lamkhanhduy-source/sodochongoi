@@ -59,7 +59,7 @@ body[data-role=view] .editonly{display:none!important}
 <div class="sub" id="sync" style="text-align:center;margin-top:-6px">Nhập mã để đồng bộ</div>
 <!-- Khu vực hiển thị thống kê K26/K25/K24 và số ghế. -->
 <div class="stats" id="stats"></div>
-<div class="legend"><button class="chip on" id="exp" >📷 Xuất ảnh PNG</button><button class="chip" id="rst">↺ Khôi phục mặc định</button><button class="chip editonly" id="clr">🗑 Xóa tất cả ghế đã xếp</button></div>
+<div class="legend"><button class="chip on" id="exp" >📷 Xuất ảnh PNG</button><button class="chip" id="rst">↺ Khôi phục mặc định</button><button class="chip editonly" id="addClass">➕ Thêm lớp</button><button class="chip editonly" id="clr">🗑 Xóa tất cả ghế đã xếp</button></div>
 <!-- Chú thích màu/chức vụ. -->
 <div class="legend" id="legend"></div>
 <!-- Bộ chọn giữa hai đợt độc lập. -->
@@ -75,7 +75,7 @@ body[data-role=view] .editonly{display:none!important}
 // Danh sách chức vụ, mã hiển thị, màu nền và màu chữ.
 const R=[['BT','Bí thư','#e53935','#fff'],['PBT','Phó Bí thư','#fb8c00','#000'],['LT','Lớp trưởng','#1e88e5','#fff'],['LP','Lớp phó','#90caf9','#000'],['CHT','Chi Hội trưởng','#43a047','#fff'],['CHP','Chi Hội phó','#a5d6a7','#000'],['BCS','Ban Cán sự khác','#ab47bc','#fff']];
 // Danh sách toàn bộ các lớp được phép chọn.
-const C=['ĐHCNSH25A','ĐHCNSH25B','ĐHCNTP25A','ĐHKTXD25A','ĐHKTXD25B','ĐHKTOTO25A','ĐHCNTT25B-IT','ĐHCNTT25C-IT','ĐHCNTT25A-CS','ĐHCNTT25B-CS','ĐHCNTT25A-IT',
+let C=['ĐHCNSH25A','ĐHCNSH25B','ĐHCNTP25A','ĐHKTXD25A','ĐHKTXD25B','ĐHKTOTO25A','ĐHCNTT25B-IT','ĐHCNTT25C-IT','ĐHCNTT25A-CS','ĐHCNTT25B-CS','ĐHCNTT25A-IT',
 'ĐHANM26A','ĐHANM26B','ĐHANM26C','ĐHCNNN26A','ĐHCNSH26A','ĐHCNSH26B','ĐHCNTP26A','ĐHCNTT26A-CS','ĐHCNTT26B-CS','ĐHCNTT26C-CS','ĐHCNTT26A-IT','ĐHCNTT26B-IT','ĐHCNTT26C-IT','ĐHCNTT26D-IT','ĐHKTĐĐT26A','ĐHKTOTO26A','ĐHKTXD26A','ĐHKTXD26B','ĐHKTXDGT26A',
 'ĐHCNTT24A-IT','ĐHCNTT24B-IT','ĐHCNTT24C-IT','ĐHCNTT24D-IT','ĐHCNTT24E-IT','ĐHCNTT24A-CS','ĐHCNTT24B-CS','ĐHCNTT24C-CS','ĐHCNSH24A','ĐHCNSH24B','ĐHCNTP24A','ĐHKTXD24A'];
 // Rút gọn tên lớp để hiển thị trên ô ghế.
@@ -103,6 +103,7 @@ try{
     if(Array.isArray(p)&&p.length===2*N) BATCHES=[p,JSON.parse(JSON.stringify(p))];
     else if(p&&Array.isArray(p.batches)&&p.batches.length===2&&p.batches.every(x=>x.length===2*N)) BATCHES=p.batches;
     else if(p&&Array.isArray(p.seats)&&p.seats.length===2*N) BATCHES=[p.seats,JSON.parse(JSON.stringify(p.seats))];
+    if(p&&Array.isArray(p.classes)) C=[...new Set([...C,...p.classes.filter(x=>typeof x==='string'&&x.trim())])];
   }
 }catch(e){}
 S=BATCHES[BATCH];
@@ -136,24 +137,27 @@ let tm,ROLE=null,KEY='',dirty=false,LASTAT=0,poll=null;
 function stat(k){const m={ok:'☁ Đã đồng bộ chung – tự cập nhật mỗi 5 giây',ro:'⚠ Lưu lên máy chủ thất bại, sẽ thử lại ở lần sửa kế tiếp',sync:'⏳ Đang lưu lên máy chủ...'};const e=$('sync');if(e)e.textContent=m[k]}
 // Nhận dữ liệu từ máy chủ và nạp vào hai đợt.
 function applySeats(q){
+  if(q&&Array.isArray(q.classes)){
+    C=[...new Set([...C,...q.classes.filter(x=>typeof x==='string'&&x.trim())])];
+  }
   if(Array.isArray(q)&&q.length==2*N){
     BATCHES=[q,JSON.parse(JSON.stringify(q))];
   }else if(q&&Array.isArray(q.batches)&&q.batches.length===2&&q.batches.every(x=>Array.isArray(x)&&x.length===2*N)){
     BATCHES=q.batches;
   }else{return}
   S=BATCHES[BATCH];
-  try{localStorage.setItem('gd1v2',JSON.stringify({batches:BATCHES}))}catch(e){}
+  try{localStorage.setItem('gd1v2',JSON.stringify({batches:BATCHES,classes:C}))}catch(e){}
   render()
 }
 // Lưu thay đổi vào localStorage và máy chủ nếu có quyền chỉnh sửa.
 function save(){
   BATCHES[BATCH]=S;
-  try{localStorage.setItem('gd1v2',JSON.stringify({batches:BATCHES}))}catch(e){}
+  try{localStorage.setItem('gd1v2',JSON.stringify({batches:BATCHES,classes:C}))}catch(e){}
   if(ROLE!=='edit')return;
   dirty=true;stat('sync');clearTimeout(tm);
   tm=setTimeout(async()=>{
     try{
-      const r=await fetch('/api/seats',{method:'POST',headers:{'content-type':'application/json','x-access-key':KEY},body:JSON.stringify({batches:BATCHES})});
+      const r=await fetch('/api/seats',{method:'POST',headers:{'content-type':'application/json','x-access-key':KEY},body:JSON.stringify({batches:BATCHES,classes:C})});
       if(!r.ok)throw 0;
       const j=await r.json();LASTAT=j.at;dirty=false;stat('ok')
     }catch(e){stat('ro')}
@@ -165,7 +169,7 @@ async function pull(){
   try{
     const r=await fetch('/api/seats',{headers:{'x-access-key':KEY},cache:'no-store'});if(!r.ok)return;
     const j=await r.json();
-    if(j.at&&j.at!==LASTAT&&!dirty){LASTAT=j.at;applySeats(j.batches||j.seats)}
+    if(j.at&&j.at!==LASTAT&&!dirty){LASTAT=j.at;applySeats(j)}
     stat('ok')
   }catch(e){}
 }
@@ -276,6 +280,25 @@ $('topClass').onchange=e=>{
  hl=i;
  render();
 };
+// Thêm lớp mới để có thể phân công nhiều chức vụ ở nhiều ghế.
+$('addClass').onclick=()=>{
+  if(ROLE!=='edit')return;
+  const raw=prompt('Nhập tên lớp mới (ví dụ: ĐHCNTT26E-IT):');
+  if(raw===null)return;
+  const name=raw.trim().replace(/\\s+/g,' ').toUpperCase();
+  if(!name){alert('Vui lòng nhập tên lớp.');return}
+  const existing=C.findIndex(c=>c.toLowerCase()===name.toLowerCase());
+  if(existing>=0){
+    alert('Lớp này đã có trong danh sách. Bạn có thể chọn lớp đó để xếp ghế.');
+    hl=existing;render();return;
+  }
+  C.push(name);
+  hl=C.length-1;
+  save();
+  render();
+  $('topClass').value=String(hl);
+  alert('Đã thêm lớp '+name+'. Để xếp lớp, hãy chọn một ghế trống, chọn chức vụ rồi chọn lớp. Lặp lại cho từng chức vụ/ghế.');
+};
 // Chuyển đổi giữa Đợt 1 và Đợt 2.
 $('batches').onclick=e=>{
   const b=e.target.closest('button');if(!b)return;
@@ -323,7 +346,7 @@ $('clr').onclick=()=>{if(ROLE!=='edit')return;const b=$('clr');if(b.dataset.a){S
 $('rst').onclick=e=>{const b=e.target;if(b.dataset.a){S=JSON.parse(DEF);BATCHES[BATCH]=S;sel=-1;hl=-1;save();render();b.textContent='↺ Khôi phục mặc định';delete b.dataset.a}else{b.dataset.a=1;b.textContent='Bấm lại để xác nhận';setTimeout(()=>{b.textContent='↺ Khôi phục mặc định';delete b.dataset.a},3000)}};
 
 // Đăng nhập bằng mã truy cập và nhận quyền xem/chỉnh sửa.
-async function login(k){k=k.trim().toUpperCase();try{const r=await fetch('/api/seats',{headers:{'x-access-key':k},cache:'no-store'});if(r.status==401)return false;if(!r.ok)return 'err';const j=await r.json();ROLE=j.role;KEY=k;try{localStorage.setItem('gd1key',k)}catch(e){}LASTAT=j.at||0;if(j.batches||j.seats)applySeats(j.batches||j.seats);applyRole();stat('ok');startPoll();return true}catch(e){return 'err'}}
+async function login(k){k=k.trim().toUpperCase();try{const r=await fetch('/api/seats',{headers:{'x-access-key':k},cache:'no-store'});if(r.status==401)return false;if(!r.ok)return 'err';const j=await r.json();ROLE=j.role;KEY=k;try{localStorage.setItem('gd1key',k)}catch(e){}LASTAT=j.at||0;if(j.batches||j.seats)applySeats(j);applyRole();stat('ok');startPoll();return true}catch(e){return 'err'}}
 // Áp dụng giao diện theo quyền người dùng.
 function applyRole(){document.body.dataset.role=ROLE;$('gate').style.display='none';$('role').textContent=ROLE==='edit'?'✏️ Quyền: CHỈNH SỬA':'👁 Quyền: CHỈ XEM';panel()}
 // Xử lý nút đăng nhập.
@@ -339,7 +362,7 @@ addEventListener('resize',fit);render();
 function dl(name,text){return new Promise(async res=>{const blob=new Blob([text],{type:'application/json'});
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();res()})}
 // Nút xuất toàn bộ dữ liệu hai đợt thành JSON.
-const XB=document.createElement('button');XB.className='chip';XB.textContent='⬇ Xuất dữ liệu (.json)';XB.onclick=()=>dl('so-do-giang-duong-1.json',JSON.stringify({v:2,batches:BATCHES}));
+const XB=document.createElement('button');XB.className='chip';XB.textContent='⬇ Xuất dữ liệu (.json)';XB.onclick=()=>dl('so-do-giang-duong-1.json',JSON.stringify({v:3,batches:BATCHES,classes:C}));
 // Nút mở khu vực nhập dữ liệu JSON.
 const IB=document.createElement('button');IB.className='chip';IB.textContent='⬆ Nhập dữ liệu';
 // Khu vực nhập dữ liệu JSON.
@@ -350,7 +373,7 @@ IB.onclick=()=>{IP.style.display=IP.style.display=='none'?'':'none'};
 // Chèn các nút xuất/nhập vào giao diện.
 $('rst').after(XB,IB);$('panel').before(IP);[$('rst'),IB,IP].forEach(x=>x.classList.add('editonly'));
 $('jf').onchange=e=>{const f=e.target.files[0];if(f)f.text().then(t=>{$('jt').value=t})};
-$('ja').onclick=()=>{try{const o=JSON.parse($('jt').value);if(o.batches&&Array.isArray(o.batches)&&o.batches.length===2&&o.batches.every(q=>Array.isArray(q)&&q.length===2*N)){BATCHES=o.batches;S=BATCHES[BATCH]}else{const q=o.seats||o;if(!Array.isArray(q)||q.length!=2*N)throw 0;BATCHES=[q,JSON.parse(JSON.stringify(q))];S=BATCHES[BATCH]}sel=-1;save();render();$('jm').textContent='✔ Đã nhập';IP.style.display='none'}catch(e){$('jm').textContent='✖ Dữ liệu không hợp lệ'}};
+$('ja').onclick=()=>{try{const o=JSON.parse($('jt').value);if(o.batches&&Array.isArray(o.batches)&&o.batches.length===2&&o.batches.every(q=>Array.isArray(q)&&q.length===2*N)){BATCHES=o.batches;S=BATCHES[BATCH]}else{const q=o.seats||o;if(!Array.isArray(q)||q.length!=2*N)throw 0;BATCHES=[q,JSON.parse(JSON.stringify(q))];S=BATCHES[BATCH]}if(Array.isArray(o.classes))C=[...new Set([...C,...o.classes.filter(x=>typeof x==='string'&&x.trim())])];sel=-1;save();render();$('jm').textContent='✔ Đã nhập';IP.style.display='none'}catch(e){$('jm').textContent='✖ Dữ liệu không hợp lệ'}};
 // Khởi động ứng dụng.
 boot();
 </script></body></html>
