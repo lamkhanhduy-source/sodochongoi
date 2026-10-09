@@ -187,7 +187,7 @@ function render(){
  $('classes').innerHTML='';
  const tc=$('topClass');
  if(tc){
-   const selectedClass=(sel>=0&&S[sel].c>=0)?S[sel].c:hl;
+   const selectedClass=hl;
    const q=(($('classSearch')||{}).value||'').trim().toLowerCase();
    tc.innerHTML='<option value="-1">— Chọn lớp —</option>'+C.map((c,i)=>({c,i})).filter(x=>!q||x.c.toLowerCase().includes(q)||short(x.c).toLowerCase().includes(q)).map(x=>`<option value="${x.i}" ${selectedClass==x.i?'selected':''}>${short(x.c)} (${S.filter(s=>s.c==x.i).length})</option>`).join('');
  }
@@ -261,13 +261,13 @@ $('topClass').onfocus=()=>{if($('classSearch')) render()};
 $('topClass').onchange=e=>{
  const i=+e.target.value;
  if(i<0){hl=-1;render();return}
- if(ROLE==='edit' && sel>=0){
-   // Ghế trống được phép chèn lớp mới. Chỉ cảnh báo khi
-   // lớp + chức vụ đã tồn tại ở một vị trí khác.
+ // Chỉ chèn lớp vào ghế khi ghế đang chọn là ghế TRỐNG.
+ // Các trường hợp còn lại chỉ làm nổi bật lớp (làm tối các lớp khác).
+ if(ROLE==='edit' && sel>=0 && S[sel].c<0){
    const currentRole=S[sel].r;
    if(isDuplicate(i,currentRole,sel)){
      alert('⚠️ Trùng lặp! Lớp '+C[i]+' đã có chức vụ '+R[currentRole][1]+' ở vị trí khác.');
-     e.target.value=String(S[sel].c);
+     e.target.value='-1';
      return;
    }
    S[sel].c=i;
