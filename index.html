@@ -314,7 +314,8 @@ function makeCanvas(){
  const rr=(a,b,w,h,r,f,st)=>{x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill()}if(st){x.strokeStyle=st;x.lineWidth=1.5;x.stroke()}};
  const T=(t,a,b,sz,col,bold,al)=>{x.font=(bold?'bold ':'')+sz+'px '+FONT;x.fillStyle=col;x.textAlign=al||'center';x.textBaseline='middle';x.fillText(t,a,b)};
  T('SƠ ĐỒ CHỖ NGỒI – GIẢNG ĐƯỜNG 1 · ĐỢT '+(BATCH+1),W/2,45,40,'#000',1);
- T('Đợt '+(BATCH+1)+' · Khóa 25 (11 lớp) · Khóa 26 (19 lớp) · mỗi lớp 7 ghế',W/2,92,22,'#444');
+ T('Đợt '+(BATCH+1)+' · Khóa 24 (12 lớp) · Khóa 25 (11 lớp) · mỗi lớp 7 ghế',W/2,92,22,'#444');
+ T('Đợt '+(BATCH+1)+' · Khóa 26 (19 lớp) · mỗi lớp 7 ghế',W/2,92,22,'#444');
  let lx=mx;const ly=130;
  R.concat([['','Ghế trống','#eceef2','#333']]).forEach(r=>{const t=(r[0]?r[0]+' = ':'')+r[1];x.font='20px '+FONT;const w=x.measureText(t).width+30;rr(lx,ly,w,36,8,r[2],r[0]?null:'#999');T(t,lx+w/2,ly+18,20,r[3]);lx+=w+14});
  x.fillStyle='#ffd54f';x.fillRect(mx,185,40,12);T('Viền vàng = Khóa 25',mx+50,191,20,'#000',0,'left');
