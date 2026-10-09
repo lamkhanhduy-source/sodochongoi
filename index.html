@@ -207,18 +207,30 @@ function panel(){
  if(sel<0){$('panel').innerHTML='<span>Bấm vào một ghế để chỉnh sửa.</span>';return}
  const s=S[sel],side=sel<N?'Trái':'Phải',i=sel%N;
  if(ROLE!=='edit'){const cl=s.c>=0?C[s.c]:null;$('panel').innerHTML=`<b>Ghế: bên ${side}, hàng ${Math.floor(i/9)+1}, cột ${i%9+1}</b><span>${cl?'CHI ĐOÀN '+cl+' – '+R[s.r][1]+(s.n?' – '+s.n:''):'Ghế trống'}</span>`;return}
+ if(s.c<0){
+  $('panel').innerHTML=`<b>Ghế trống: bên ${side}, hàng ${Math.floor(i/9)+1}, cột ${i%9+1}</b>
+  <label>Lớp<select id="assignClass"><option value="-1">— Chọn lớp —</option>${C.map((c,j)=>`<option value="${j}" ${j===hl?'selected':''}>${c}</option>`).join('')}</select></label>
+  <label>Chức vụ<select id="pr">${R.map((r,j)=>`<option value="${j}" ${s.r==j?'selected':''}>${r[1]}</option>`).join('')}</select></label>
+  <label>Họ tên (tùy chọn)<input id="pn" value="${s.n.replace(/"/g,'&quot;')}" placeholder="Nhập tên"></label>
+  <button class="chip on" id="assignSeat">➕ Gán chức vụ vào ghế trống</button>
+  <span style="color:var(--mut);font-size:12px">Chọn lớp và chức vụ cho ghế này. Lặp lại với các ghế trống khác để xếp nhiều chức vụ của cùng lớp.</span>`;
+  $('assignClass').onchange=e=>{hl=+e.target.value};
+  $('assignSeat').onclick=()=>{
+   const c=+$('assignClass').value,r=+$('pr').value,n=$('pn').value.trim();
+   if(c<0){alert('Vui lòng chọn lớp trước.');return}
+   if(isDuplicate(c,r,sel)){alert('Lớp '+C[c]+' đã có chức vụ '+R[r][1]+'. Hãy chọn chức vụ khác.');return}
+   S[sel]={c,r,n};hl=c;save();render();
+  };
+  return;
+ }
  $('panel').innerHTML=`<b>Ghế: bên ${side}, hàng ${Math.floor(i/9)+1}, cột ${i%9+1}</b>
  <label>Chức vụ<select id="pr">${R.map((r,j)=>`<option value="${j}" ${s.r==j?'selected':''}>${r[1]}</option>`).join('')}</select></label>
  <label>Họ tên (tùy chọn)<input id="pn" value="${s.n.replace(/"/g,'&quot;')}" placeholder="Nhập tên"></label>`;
-$('pr').onchange=e=>{
+ $('pr').onchange=e=>{
   const newRole=+e.target.value;
-  if(isDuplicate(s.c,newRole,sel)){
-    alert('⚠️ Trùng lặp! Lớp '+C[s.c]+' đã có chức vụ '+R[newRole][1]+' ở vị trí khác.');
-    e.target.value=String(s.r);
-    return;
-  }
+  if(isDuplicate(s.c,newRole,sel)){alert('⚠️ Trùng lặp! Lớp '+C[s.c]+' đã có chức vụ '+R[newRole][1]+' ở vị trí khác.');e.target.value=String(s.r);return}
   s.r=newRole;save();render();
-};
+ };
  $('pn').onchange=e=>{s.n=e.target.value.trim();save();render()};
 }
 // Chọn ghế khi người dùng bấm vào sơ đồ.
@@ -264,40 +276,8 @@ $('classSearch').oninput=()=>{
 $('topClass').onfocus=()=>{if($('classSearch')) render()};
 $('topClass').onchange=e=>{
  const i=+e.target.value;
- if(i<0){hl=-1;render();return}
- // Chỉ chèn lớp vào ghế khi ghế đang chọn là ghế TRỐNG.
- // Các trường hợp còn lại chỉ làm nổi bật lớp (làm tối các lớp khác).
- if(ROLE==='edit' && sel>=0 && S[sel].c<0){
-   const currentRole=S[sel].r;
-   if(isDuplicate(i,currentRole,sel)){
-     alert('⚠️ Trùng lặp! Lớp '+C[i]+' đã có chức vụ '+R[currentRole][1]+' ở vị trí khác.');
-     e.target.value='-1';
-     return;
-   }
-   S[sel].c=i;
-   save();
- }
- hl=i;
+ hl=i<0?-1:i;
  render();
-};
-// Thêm lớp mới để có thể phân công nhiều chức vụ ở nhiều ghế.
-$('addClass').onclick=()=>{
-  if(ROLE!=='edit')return;
-  const raw=prompt('Nhập tên lớp mới (ví dụ: ĐHCNTT26E-IT):');
-  if(raw===null)return;
-  const name=raw.trim().replace(/\\s+/g,' ').toUpperCase();
-  if(!name){alert('Vui lòng nhập tên lớp.');return}
-  const existing=C.findIndex(c=>c.toLowerCase()===name.toLowerCase());
-  if(existing>=0){
-    alert('Lớp này đã có trong danh sách. Bạn có thể chọn lớp đó để xếp ghế.');
-    hl=existing;render();return;
-  }
-  C.push(name);
-  hl=C.length-1;
-  save();
-  render();
-  $('topClass').value=String(hl);
-  alert('Đã thêm lớp '+name+'. Để xếp lớp, hãy chọn một ghế trống, chọn chức vụ rồi chọn lớp. Lặp lại cho từng chức vụ/ghế.');
 };
 // Chuyển đổi giữa Đợt 1 và Đợt 2.
 $('batches').onclick=e=>{
