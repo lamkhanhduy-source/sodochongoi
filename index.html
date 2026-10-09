@@ -314,18 +314,24 @@ function makeCanvas(){
  const rr=(a,b,w,h,r,f,st)=>{x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill()}if(st){x.strokeStyle=st;x.lineWidth=1.5;x.stroke()}};
  const T=(t,a,b,sz,col,bold,al)=>{x.font=(bold?'bold ':'')+sz+'px '+FONT;x.fillStyle=col;x.textAlign=al||'center';x.textBaseline='middle';x.fillText(t,a,b)};
  T('SƠ ĐỒ CHỖ NGỒI – GIẢNG ĐƯỜNG 1 · ĐỢT '+(BATCH+1),W/2,45,40,'#000',1);
- T('Đợt '+(BATCH+1)+' · Khóa 24 (12 lớp) · Khóa 25 (11 lớp) · mỗi lớp 7 ghế',W/2,92,22,'#444');
- T('Đợt '+(BATCH+1)+' · Khóa 26 (19 lớp) · mỗi lớp 7 ghế',W/2,144,22,'#444');
+ if(BATCH===0){
+  T('Đợt 1 · Khóa 24 (12 lớp) · Khóa 25 (11 lớp) · mỗi lớp 7 ghế',W/2,92,22,'#444');
+ }else{
+  T('Đợt 2 · Khóa 26 (19 lớp) · mỗi lớp 7 ghế',W/2,92,22,'#444');
+ }
  let lx=mx;const ly=130;
  R.concat([['','Ghế trống','#eceef2','#333']]).forEach(r=>{const t=(r[0]?r[0]+' = ':'')+r[1];x.font='20px '+FONT;const w=x.measureText(t).width+30;rr(lx,ly,w,36,8,r[2],r[0]?null:'#999');T(t,lx+w/2,ly+18,20,r[3]);lx+=w+14});
- x.fillStyle='#ffd54f';x.fillRect(mx,185,40,12);T('Viền vàng = Khóa 25',mx+50,191,20,'#000',0,'left');
- x.fillStyle='#26c6da';x.fillRect(mx+330,185,40,12);T('Viền xanh ngọc = Khóa 26',mx+380,191,20,'#000',0,'left');
+ rr(mx,174,42,28,5,'#eceef2',null);T('Không viền = Khóa 24',mx+54,188,20,'#000',0,'left');
+ rr(mx+300,174,42,28,5,'#eceef2','#ffd54f');T('Viền vàng = Khóa 25',mx+354,188,20,'#000',0,'left');
+ rr(mx+610,174,42,28,5,'#eceef2','#26c6da');T('Viền xanh ngọc = Khóa 26',mx+664,188,20,'#000',0,'left');
  rr(mx,225,W-2*mx,60,10,'#8d6e63');T('SÂN KHẤU – BỤC PHÁT BIỂU',W/2,255,30,'#fff',1);
  for(let side=0;side<2;side++){const ox=mx+side*(bw+aisle);
   for(let i=0;i<N;i++){const r=Math.floor(i/9),c=i%9,a=ox+c*(cw+g),b=top+r*(ch+g),s=S[side*N+i];
    if(s.c<0){rr(a,b,cw,ch,8,'#eceef2','#aaa');T('Trống',a+cw/2,b+ch/2,17,'#777');continue}
-   const cl=C[s.c],ro=R[s.r];rr(a,b,cw,ch,8,ro[2]);
-   x.fillStyle=khoa(cl)==25?'#ffd54f':'#26c6da';x.fillRect(a+6,b+ch-8,cw-12,4);
+   const cl=C[s.c],ro=R[s.r],k=khoa(cl);
+   const border=k===25?'#ffd54f':k===26?'#26c6da':null;
+   rr(a,b,cw,ch,8,ro[2],border);
+   
    T(short(cl),a+cw/2,b+22,17,ro[3]);T(s.n||ro[0],a+cw/2,b+47,s.n&&s.n.length>8?16:22,ro[3],1)}}
  for(let r=0;r<13;r++)T('H'+(r+1),mx+bw+aisle/2,top+r*(ch+g)+ch/2,20,'#666');
  T('Ghi chú: mỗi lớp gồm 7 ghế liên tiếp theo thứ tự BT, PBT, LT, LP, CHT, CHP, BCS.',W/2,H-40,20,'#444');
